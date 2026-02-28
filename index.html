@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Só na Brasa | Delivery</title>
+    
+    <!-- Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Configuração de Cores Customizadas no Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brasa: {
+                            500: '#ef4444', // Vermelho
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                        },
+                        fogo: {
+                            400: '#facc15', // Amarelo
+                            500: '#eab308',
+                        },
+                        carvao: {
+                            800: '#1f2937', // Quase preto
+                            900: '#111827', // Preto profundo
+                            950: '#030712',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Oswald', 'sans-serif'],
+                        body: ['Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CSS Personalizado para animações e ajustes finos */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: #030712; /* carvao-950 */
+            color: white;
+            padding-bottom: 80px; /* Espaço para o botão fixo do carrinho */
+        }
+        
+        /* Ocultar barra de rolagem mas manter funcionamento */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ef4444; 
+            border-radius: 10px;
+        }
+
+        /* Animações Letais (Prova Social) */
+        .toast-enter {
+            animation: slideInBottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .toast-exit {
+            animation: slideOutBottom 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+        }
+
+        @keyframes slideInBottom {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideOutBottom {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(150%); opacity: 0; }
+        }
+
+        /* Modal do Carrinho */
+        #cart-modal {
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(100%);
+        }
+        #cart-modal.open {
+            transform: translateY(0);
+        }
+
+        /* Efeito de pulse sutil para destaques */
+        .pulse-soft {
+            animation: pulseSoft 2s infinite;
+        }
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Imagem Hero Escurecida para leitura */
+        .hero-bg {
+            background-image: linear-gradient(to bottom, rgba(3, 7, 18, 0.6), rgba(3, 7, 18, 1)), url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Novas Animações */
+        .float-anim {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Efeito de Brasas (Embers) Voando */
+        .ember {
+            position: absolute;
+            bottom: -20px;
+            background: radial-gradient(circle, #fcd34d 0%, #ef4444 60%, transparent 100%);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            animation: float-up var(--duration) ease-in infinite;
+            filter: blur(1px);
+            mix-blend-mode: screen;
+            z-index: 10;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(1) translateX(0); opacity: 0; }
+            20% { opacity: 0.9; }
+            80% { opacity: 0; transform: translateY(-60vh) scale(0.5) translateX(var(--drift)); }
+            100% { transform: translateY(-100vh) scale(0) translateX(var(--drift)); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="font-body text-gray-100 antialiased w-full max-w-md md:max-w-5xl mx-auto relative shadow-2xl bg-carvao-900 min-h-screen flex flex-col">
+
+    <!-- Container das Brasas Animadas -->
+    <div id="embers-container" class="fixed inset-0 pointer-events-none overflow-hidden z-20"></div>
+
+    <!-- Notificação Flutuante de Vendas (Gatilho de Escassez) -->
+    <div id="sales-toast" class="fixed top-4 left-4 right-4 z-50 bg-carvao-800 border-l-4 border-fogo-500 text-white p-3 rounded-md shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none transform translate-y-[-100%] transition-all duration-500" style="max-width: 400px; margin: 0 auto;">
+        <div class="bg-fogo-500 text-carvao-900 rounded-full p-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div>
+            <p class="text-sm font-bold text-fogo-400" id="toast-name">João do Sítio</p>
+            <p class="text-xs text-gray-300">Acabou de pedir <span class="font-bold text-white" id="toast-item">Picanha Completa</span>!</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="hero-bg pt-12 pb-8 px-4 md:py-24 text-center rounded-b-3xl shadow-lg relative overflow-hidden">
+        <div class="absolute top-4 left-4 flex items-center gap-1 text-fogo-400 text-xs font-bold pulse-soft bg-black/50 px-2 py-1 rounded-full border border-fogo-500/30">
+            <div class="w-2 h-2 bg-fogo-500 rounded-full animate-ping mr-1"></div> Aberto agora
+        </div>
+        
+        <h1 class="font-display text-5xl md:text-7xl font-bold text-white mt-6 drop-shadow-lg tracking-wide uppercase float-anim">
+            Só na Brasa<span class="text-brasa-500">.</span>
+        </h1>
+        <p class="text-fogo-400 font-bold tracking-widest text-sm md:text-base uppercase mt-1">São Miguel / RN</p>
+        
+        <div class="mt-4 flex justify-center items-center gap-2 text-xs md:text-sm bg-black/50 inline-flex px-4 py-2 rounded-full border border-carvao-700 mx-auto backdrop-blur-sm relative z-30 shadow-lg">
+            <svg class="w-4 h-4 text-fogo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="text-gray-200">📍 Retirada: Rua Cel. João Pessoa, 100 - Centro</span>
+        </div>
+        
+        <p class="mt-4 text-gray-200 text-sm md:text-lg max-w-[280px] md:max-w-xl mx-auto leading-relaxed">O melhor churrasco da cidade entregue estalando na sua porta ou pronto para retirar.</p>
+        
+        <div class="mt-6 flex justify-center gap-4 text-xs md:text-sm font-bold text-gray-400 relative z-30">
+                <svg class="w-4 h-4 text-fogo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Entrega Rápida
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegação de Categorias (Horizontal Scroll) -->
+    <nav class="sticky top-0 z-30 bg-carvao-950/95 backdrop-blur-sm border-b border-carvao-800 py-3 shadow-md md:flex md:justify-center">
+        <ul class="flex overflow-x-auto gap-3 px-4 pb-2 snap-x" id="category-nav">
+            <!-- Gerado via JS -->
+        </ul>
+    </nav>
+
+    <!-- Cardápio Principal -->
+    <main class="px-4 py-6 md:p-8 flex-1" id="menu-container">
+        <!-- Gerado via JS -->
+    </main>
+
+    <!-- Seção de Depoimentos -->
+    <section class="bg-carvao-800 py-8 md:py-12 px-4 border-t border-b border-carvao-700 my-4 md:my-8 relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-brasa-600/10 rounded-full blur-3xl hidden md:block"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-fogo-500/10 rounded-full blur-3xl hidden md:block"></div>
+        
+        <h3 class="font-display text-2xl md:text-3xl font-bold text-white text-center mb-8 relative z-10">A galera recomenda <span class="text-fogo-500 float-anim inline-block">⭐</span></h3>
+        <div class="flex overflow-x-auto gap-4 pb-4 snap-x md:grid md:grid-cols-3 md:gap-6 md:overflow-visible">
+            <!-- Review 1 -->
+            <div class="min-w-[280px] bg-carvao-900 p-5 rounded-2xl shadow-lg border border-carvao-700 snap-center transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(239,68,68,0.15)] hover:border-brasa-500/30 relative z-10">
+                <div class="flex items-center gap-3 mb-4 border-b border-carvao-800 pb-3">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80" alt="Marcos T." class="w-12 h-12 rounded-full border-2 border-fogo-500 object-cover shadow-md">
+                    <div>
+                        <p class="text-sm font-bold text-white">Marcos T.</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider">📍 Centro</p>
+                    </div>
+                </div>
+                <div class="flex text-fogo-500 text-sm mb-2">★★★★★</div>
+                <p class="text-sm text-gray-300 italic leading-relaxed">"A costela desmancha na boca! A entrega pro Centro foi super rápida. Recomendo demais."</p>
+            </div>
+            <!-- Review 2 -->
+            <div class="min-w-[280px] bg-carvao-900 p-5 rounded-2xl shadow-lg border border-carvao-700 snap-center transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(239,68,68,0.15)] hover:border-brasa-500/30 relative z-10">
+                <div class="flex items-center gap-3 mb-4 border-b border-carvao-800 pb-3">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Ana Lúcia" class="w-12 h-12 rounded-full border-2 border-fogo-500 object-cover shadow-md">
+                    <div>
+                        <p class="text-sm font-bold text-white">Ana Lúcia</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider">📍 Sítio</p>
+                    </div>
+                </div>
+                <div class="flex text-fogo-500 text-sm mb-2">★★★★★</div>
+                <p class="text-sm text-gray-300 italic leading-relaxed">"Melhor baião de dois de São Miguel, sem dúvidas. Chegou tudo quentinho no Sítio."</p>
+            </div>
+             <!-- Review 3 -->
+             <div class="min-w-[280px] bg-carvao-900 p-5 rounded-2xl shadow-lg border border-carvao-700 snap-center transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(239,68,68,0.15)] hover:border-brasa-500/30 relative z-10">
+                <div class="flex items-center gap-3 mb-4 border-b border-carvao-800 pb-3">
+                    <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop&q=80" alt="Roberto" class="w-12 h-12 rounded-full border-2 border-fogo-500 object-cover shadow-md">
+                    <div>
+                        <p class="text-sm font-bold text-white">Roberto</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider">📍 Alto Santa Tereza</p>
+                    </div>
+                </div>
+                <div class="flex text-fogo-500 text-sm mb-2">★★★★★</div>
+                <p class="text-sm text-gray-300 italic leading-relaxed">"Pedi a maminha e tava no ponto perfeito. O atendimento pelo Zap foi nota 10."</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-xs text-gray-500 pb-32 md:pb-12 relative z-30">
+        <p class="font-bold text-gray-400 text-base">Só na Brasa Delivery</p>
+        <p class="mt-2 flex justify-center items-center gap-1"><svg class="w-3 h-3 text-fogo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Rua Cel. João Pessoa, 100 - Centro, São Miguel/RN</p>
+        <p class="mt-4 opacity-50">Desenvolvido com estratégia de vendas.</p>
+    </footer>
+
+    <!-- Barra Inferior Fixa "Ver Carrinho" -->
+    <div id="floating-cart-bar" class="fixed bottom-0 left-0 right-0 max-w-md md:max-w-sm md:left-auto md:right-8 md:bottom-8 mx-auto bg-carvao-900 md:bg-transparent border-t border-carvao-800 md:border-none p-4 md:p-0 z-40 transform translate-y-full transition-transform duration-300 shadow-[0_-10px_20px_rgba(0,0,0,0.5)] md:shadow-none">
+        <button onclick="toggleCart()" class="w-full bg-brasa-600 hover:bg-brasa-500 text-white font-bold py-3 px-4 md:py-4 md:px-6 rounded-xl md:rounded-full flex justify-between items-center shadow-lg md:shadow-[0_10px_25px_rgba(239,68,68,0.4)] active:scale-95 hover:scale-105 transition-all">
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <svg class="w-6 h-6 text-white float-anim" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span id="cart-count-badge" class="absolute -top-2 -right-2 bg-fogo-500 text-carvao-900 text-[10px] md:text-xs font-bold w-5 h-5 md:w-6 md:h-6 flex items-center justify-center rounded-full border-2 border-carvao-900">0</span>
+                </div>
+                <span class="md:text-lg">Ver Pedido</span>
+            </div>
+            <span id="floating-total" class="font-display tracking-wide md:text-xl">R$ 0,00</span>
+        </button>
+    </div>
+
+    <!-- Botão Fixo WhatsApp -->
+    <a href="#" onclick="openDirectWhatsapp(event)" class="fixed bottom-24 right-4 md:bottom-8 md:left-8 md:right-auto z-30 bg-green-500 text-white p-3 md:p-4 rounded-full shadow-[0_4px_14px_rgba(34,197,94,0.5)] flex items-center justify-center hover:bg-green-400 hover:scale-110 transition-all">
+        <svg class="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.614-.087-.112-.708-.94-.708-1.793s.448-1.273.606-1.446c.158-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.173.087.289.129.332.202.043.073.043.423-.101.827z"></path><path d="M11.994 2C6.476 2 2 6.477 2 11.996c0 1.947.538 3.824 1.559 5.424L2 22l4.755-1.229c1.554.912 3.328 1.42 5.24 1.42 5.517 0 9.993-4.476 9.993-9.996S17.511 2 11.994 2zm0 18.232c-1.66 0-3.26-.453-4.666-1.303l-.335-.2-3.037.784.81-2.923-.22-.352c-.933-1.488-1.426-3.203-1.426-4.996 0-4.639 3.774-8.412 8.413-8.412 4.638 0 8.412 3.773 8.412 8.412s-3.774 8.412-8.412 8.412z"></path></svg>
+    </a>
+
+    <!-- Overlay do Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-opacity" onclick="toggleCart()"></div>
+
+    <!-- Modal do Carrinho & Checkout -->
+    <div id="cart-modal" class="fixed bottom-0 left-0 right-0 max-w-md md:max-w-lg md:right-8 md:left-auto md:bottom-24 mx-auto md:mx-0 bg-carvao-900 z-50 rounded-t-3xl md:rounded-3xl border-t md:border border-carvao-700 shadow-2xl flex flex-col max-h-[90vh] md:max-h-[80vh]">
+        <!-- Header do Modal -->
+        <div class="flex justify-between items-center p-4 border-b border-carvao-800">
+            <h2 class="font-display text-2xl font-bold text-white flex items-center gap-2">
+                Seu Pedido
+            </h2>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-white p-2 bg-carvao-800 rounded-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Área Rolável -->
+        <div class="overflow-y-auto p-4 flex-1 custom-scrollbar">
+            
+            <!-- Itens do Carrinho -->
+            <div id="cart-items" class="space-y-4 mb-6">
+                <!-- Injetado via JS -->
+            </div>
+
+            <!-- Upsell Automático (Aparece se não tiver Baião de Dois) -->
+            <div id="upsell-container" class="bg-gradient-to-r from-fogo-500/10 to-transparent border border-fogo-500/30 rounded-xl p-3 mb-6 hidden flex justify-between items-center">
+                <div>
+                    <p class="text-fogo-400 font-bold text-sm flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Turbinar pedido?</p>
+                    <p class="text-xs text-gray-300">Adicione nosso famoso Baião por R$ 18</p>
+                </div>
+                <button onclick="addUpsell()" class="bg-fogo-500 text-carvao-900 text-xs font-bold px-3 py-2 rounded-lg active:scale-95 transition-transform">Add</button>
+            </div>
+
+            <!-- Formulário de Checkout Simples -->
+            <div class="bg-carvao-800 p-4 rounded-xl border border-carvao-700 mb-6">
+                <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider">Dados para Entrega</h3>
+                <form id="checkout-form" class="space-y-3">
+                    <input type="text" id="cliente-nome" placeholder="Seu Nome" required class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors">
+                    
+                    <div class="flex gap-2">
+                        <input type="tel" id="cliente-tel" placeholder="WhatsApp / Celular" required class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors">
+                    </div>
+
+                    <select id="cliente-bairro" required onchange="calculateTotal()" class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors appearance-none">
+                        <option value="" disabled selected>Selecione seu Bairro...</option>
+                        <option value="centro">Centro - R$ 4,00</option>
+                        <option value="sitio">Sítio/Zona Rural - R$ 10,00</option>
+                        <option value="santa-tereza">Alto Santa Tereza - R$ 6,00</option>
+                        <option value="nucleo">Núcleo - R$ 5,00</option>
+                        <option value="retirada">Vou buscar no local - Grátis</option>
+                    </select>
+
+                    <input type="text" id="cliente-rua" placeholder="Rua e Número" required class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors">
+                    
+                    <textarea id="cliente-obs" placeholder="Observações (ex: Troco pra 50, Carne bem passada...)" rows="2" class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors"></textarea>
+                </form>
+            </div>
+
+            <!-- Resumo de Valores -->
+            <div class="space-y-2 text-sm border-t border-carvao-700 pt-4 mb-4">
+                <div class="flex justify-between text-gray-400">
+                    <span>Subtotal:</span>
+                    <span id="resumo-subtotal">R$ 0,00</span>
+                </div>
+                <div class="flex justify-between text-gray-400">
+                    <span>Taxa de Entrega:</span>
+                    <span id="resumo-taxa">Calcular</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-white pt-2 border-t border-carvao-800">
+                    <span>Total:</span>
+                    <span id="resumo-total" class="text-fogo-400 font-display">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer do Modal (Botão de Envio) -->
+        <div class="p-4 bg-carvao-950 border-t border-carvao-800">
+            <button onclick="finishOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-xl flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(34,197,94,0.3)] active:scale-95 transition-transform text-lg">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.614-.087-.112-.708-.94-.708-1.793s.448-1.273.606-1.446c.158-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.173.087.289.129.332.202.043.073.043.423-.101.827z"></path></svg>
+                Finalizar pelo WhatsApp
+            </button>
+            <p class="text-[10px] text-center text-gray-500 mt-2">Você será redirecionado para enviar o pedido.</p>
+        </div>
+    </div>
+
+    <!-- Componente de Mensagem Simples (Substitui alert) -->
+    <div id="msg-box" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-carvao-800 border border-brasa-500 text-white p-5 rounded-xl shadow-2xl z-[60] hidden w-[80%] max-w-[300px] text-center">
+        <p id="msg-box-text" class="mb-4 text-sm font-bold"></p>
+        <button onclick="closeMsgBox()" class="bg-brasa-600 w-full py-2 rounded-lg font-bold">OK</button>
+    </div>
+    <div id="msg-overlay" class="fixed inset-0 bg-black/80 z-[55] hidden" onclick="closeMsgBox()"></div>
+
+    <!-- LÓGICA DO NEGÓCIO (JAVASCRIPT) -->
+    <script>
+        // --- DADOS DO CARDÁPIO ---
+        const WHATSAPP_NUMBER = "5584999999999"; // Coloque o número real aqui
+        
+        const deliveryRates = {
+            'centro': { name: 'Centro', price: 4.00 },
+            'sitio': { name: 'Sítio/Zona Rural', price: 10.00 },
+            'santa-tereza': { name: 'Alto Santa Tereza', price: 6.00 },
+            'nucleo': { name: 'Núcleo', price: 5.00 },
+            'retirada': { name: 'Retirada no Local', price: 0.00 }
+        };
+
+        const menuData = [
+            {
+                category: "Boi",
+                icon: "🥩",
+                items: [
+                    { id: "b1", name: "Picanha na Brasa (500g)", desc: "Acompanha farofa e vinagrete.", price: 89.90, img: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?w=300&q=80&fit=crop", bestSeller: true },
+                    { id: "b2", name: "Maminha Fatiada (500g)", desc: "Carne macia, com borda de gordura.", price: 65.00, img: "https://images.unsplash.com/photo-1546964124-0cce460f38ef?w=300&q=80&fit=crop" }
+                ]
+            },
+            {
+                category: "Frango",
+                icon: "🍗",
+                items: [
+                    { id: "f1", name: "Frango Assado Inteiro", desc: "Bem temperado, pele crocante.", price: 45.00, img: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?w=300&q=80&fit=crop", bestSeller: true },
+                    { id: "f2", name: "Sobrecoxa Desossada (400g)", desc: "Grelhada na brasa.", price: 32.00, img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=300&q=80&fit=crop" }
+                ]
+            },
+            {
+                category: "Costela Suína",
+                icon: "🍖",
+                items: [
+                    { id: "c1", name: "Costela ao Barbecue", desc: "Desmancha na boca. Serve 2 pessoas.", price: 75.00, img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=300&q=80&fit=crop", bestSeller: true }
+                ]
+            },
+            {
+                category: "Linguiça",
+                icon: "🌭",
+                items: [
+                    { id: "l1", name: "Linguiça Toscana (400g)", desc: "Clássica do churrasco.", price: 25.00, img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=300&q=80&fit=crop" },
+                    { id: "l2", name: "Linguiça Apimentada", desc: "Leve picância.", price: 28.00, img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=300&q=80&fit=crop" }
+                ]
+            },
+            {
+                category: "Porções",
+                icon: "🍚",
+                items: [
+                    { id: "p1", name: "Baião de Dois Especial", desc: "Com queijo coalho e carne de sol.", price: 18.00, img: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=300&q=80&fit=crop", bestSeller: true },
+                    { id: "p2", name: "Arroz de Leite", desc: "Cremosidade pura.", price: 15.00, img: "https://images.unsplash.com/photo-1536304929831-ee1ca9d44906?w=300&q=80&fit=crop" },
+                    { id: "p3", name: "Feijão Tropeiro", desc: "Com torresmo crocante.", price: 16.00, img: "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=300&q=80&fit=crop" },
+                    { id: "p4", name: "Macaxeira Frita", desc: "Porção generosa.", price: 14.00, img: "https://images.unsplash.com/photo-1623341214825-9f4f963727da?w=300&q=80&fit=crop" }
+                ]
+            }
+        ];
+
+        // --- ESTADO DO SISTEMA ---
+        let cart = JSON.parse(localStorage.getItem('sonabrasa_cart')) || [];
+
+        // --- INICIALIZAÇÃO ---
+        function init() {
+            renderNav();
+            renderMenu();
+            updateCartUI();
+            startSocialProof();
+            createEmbers(); // Dispara o efeito visual da brasa
+        }
+
+        // --- RENDERIZAÇÃO ---
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function renderNav() {
+            const nav = document.getElementById('category-nav');
+            let html = '';
+            menuData.forEach((cat, index) => {
+                // Primeira categoria selecionada visualmente
+                const bgClass = index === 0 ? 'bg-brasa-600 text-white' : 'bg-carvao-800 text-gray-400 hover:text-white';
+                html += `
+                    <li class="snap-start shrink-0">
+                        <a href="#cat-${index}" class="px-4 py-2 rounded-full text-sm font-bold block whitespace-nowrap border border-carvao-700 transition-colors ${bgClass}" onclick="setActiveNav(this)">
+                            ${cat.icon} ${cat.category}
+                        </a>
+                    </li>
+                `;
+            });
+            nav.innerHTML = html;
+        }
+
+        function setActiveNav(element) {
+            // Remove active from all
+            document.querySelectorAll('#category-nav a').forEach(a => {
+                a.className = "px-4 py-2 rounded-full text-sm font-bold block whitespace-nowrap border border-carvao-700 transition-colors bg-carvao-800 text-gray-400 hover:text-white";
+            });
+            // Add to clicked
+            element.className = "px-4 py-2 rounded-full text-sm font-bold block whitespace-nowrap border border-carvao-700 transition-colors bg-brasa-600 text-white";
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            let html = '';
+
+            menuData.forEach((cat, index) => {
+                html += `
+                    <div id="cat-${index}" class="mb-8 md:mb-12 pt-4 scroll-mt-24 md:scroll-mt-32">
+                        <h2 class="font-display text-2xl md:text-3xl font-bold text-white mb-6 flex items-center gap-2 border-b border-carvao-800 pb-2">
+                            ${cat.icon} ${cat.category}
+                        </h2>
+                        <div class="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+                `;
+
+                cat.items.forEach(item => {
+                    const badge = item.bestSeller ? `<span class="absolute top-2 left-2 bg-fogo-500 text-carvao-900 text-[10px] font-bold px-2 py-1 rounded-sm shadow-md uppercase z-10">🔥 Mais Vendido</span>` : '';
+                    
+                    html += `
+                        <div class="bg-carvao-800 rounded-xl p-3 md:p-4 flex gap-3 md:gap-4 border border-carvao-700 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(239,68,68,0.15)] hover:border-brasa-500/40 group cursor-pointer" onclick="document.getElementById('btn-add-${item.id}').click()">
+                            ${badge}
+                            <div class="w-24 h-24 md:w-28 md:h-28 shrink-0 rounded-lg overflow-hidden bg-carvao-900 relative">
+                                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-0"></div>
+                                <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <h3 class="text-white font-bold text-sm md:text-base leading-tight group-hover:text-fogo-400 transition-colors">${item.name}</h3>
+                                    <p class="text-gray-400 text-xs md:text-sm mt-1 line-clamp-2">${item.desc}</p>
+                                </div>
+                                <div class="flex justify-between items-end mt-2 relative z-10">
+                                    <span class="text-fogo-400 font-bold md:text-lg">${formatCurrency(item.price)}</span>
+                                    <button id="btn-add-${item.id}" onclick="event.stopPropagation(); addToCart('${item.id}', '${item.name}', ${item.price})" class="bg-carvao-900 hover:bg-brasa-600 border border-carvao-600 hover:border-brasa-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] active:scale-95">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- LÓGICA DO CARRINHO ---
+        function addToCart(id, name, price) {
+            const existing = cart.find(i => i.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ id, name, price, qty: 1 });
+            }
+            saveCart();
+            updateCartUI();
+            
+            // Feedback visual rápido
+            const btn = event.currentTarget;
+            const icon = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            btn.classList.add('bg-carvao-700');
+            setTimeout(() => {
+                btn.innerHTML = icon;
+                btn.classList.remove('bg-carvao-700');
+            }, 1000);
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+                saveCart();
+                updateCartUI();
+                renderCartModal(); // Re-renderiza o modal se estiver aberto
+            }
+        }
+
+        function saveCart() {
+            localStorage.setItem('sonabrasa_cart', JSON.stringify(cart));
+        }
+
+        function updateCartUI() {
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            // Badge da barra inferior
+            document.getElementById('cart-count-badge').innerText = totalQty;
+            document.getElementById('floating-total').innerText = formatCurrency(subtotal);
+
+            const floatingBar = document.getElementById('floating-cart-bar');
+            if (totalQty > 0) {
+                floatingBar.classList.remove('translate-y-full');
+            } else {
+                floatingBar.classList.add('translate-y-full');
+                // Se zerar o carrinho, fecha o modal
+                if(document.getElementById('cart-modal').classList.contains('open')){
+                    toggleCart();
+                }
+            }
+        }
+
+        // --- MODAL DO CARRINHO ---
+        function toggleCart() {
+            if (cart.length === 0 && !document.getElementById('cart-modal').classList.contains('open')) {
+                showMsg("Seu carrinho está vazio. Adicione uma carne suculenta primeiro!");
+                return;
+            }
+
+            const modal = document.getElementById('cart-modal');
+            const overlay = document.getElementById('modal-overlay');
+            
+            if (modal.classList.contains('open')) {
+                // Fechar
+                modal.classList.remove('open');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            } else {
+                // Abrir
+                renderCartModal();
+                modal.classList.add('open');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Evita scroll do fundo
+            }
+        }
+
+        function renderCartModal() {
+            const container = document.getElementById('cart-items');
+            let html = '';
+
+            cart.forEach(item => {
+                html += `
+                    <div class="flex justify-between items-center bg-carvao-800 p-3 rounded-lg border border-carvao-700">
+                        <div class="flex-1">
+                            <h4 class="text-white text-sm font-bold">${item.name}</h4>
+                            <span class="text-fogo-400 text-xs">${formatCurrency(item.price)}</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-carvao-900 rounded-lg p-1 border border-carvao-600">
+                            <button onclick="updateQty('${item.id}', -1)" class="w-7 h-7 flex items-center justify-center text-gray-400 active:text-white">-</button>
+                            <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
+                            <button onclick="updateQty('${item.id}', 1)" class="w-7 h-7 flex items-center justify-center text-gray-400 active:text-white">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            // Lógica do Upsell: Se não tem Baião (id p1), mostra o banner
+            const hasBaiao = cart.some(i => i.id === 'p1');
+            const upsell = document.getElementById('upsell-container');
+            if (!hasBaiao && cart.length > 0) {
+                upsell.classList.remove('hidden');
+            } else {
+                upsell.classList.add('hidden');
+            }
+
+            calculateTotal();
+        }
+
+        function addUpsell() {
+            addToCart('p1', 'Baião de Dois Especial', 18.00);
+            renderCartModal(); // Atualiza a view na hora
+        }
+
+        function calculateTotal() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('resumo-subtotal').innerText = formatCurrency(subtotal);
+
+            const bairroSelect = document.getElementById('cliente-bairro');
+            let taxa = 0;
+            
+            if (bairroSelect.value && deliveryRates[bairroSelect.value]) {
+                taxa = deliveryRates[bairroSelect.value].price;
+                document.getElementById('resumo-taxa').innerText = taxa === 0 ? "Grátis" : formatCurrency(taxa);
+            } else {
+                document.getElementById('resumo-taxa').innerText = "Calcular";
+            }
+
+            const total = subtotal + taxa;
+            document.getElementById('resumo-total').innerText = formatCurrency(total);
+        }
+
+        // --- CHECKOUT VIA WHATSAPP ---
+        function finishOrder() {
+            // Validações básicas
+            const nome = document.getElementById('cliente-nome').value.trim();
+            const tel = document.getElementById('cliente-tel').value.trim();
+            const bairroVal = document.getElementById('cliente-bairro').value;
+            const rua = document.getElementById('cliente-rua').value.trim();
+            const obs = document.getElementById('cliente-obs').value.trim();
+
+            if (!nome || !tel || !bairroVal) {
+                showMsg("Preencha seu Nome, Telefone e Bairro para continuar.");
+                return;
+            }
+            if (bairroVal !== 'retirada' && !rua) {
+                showMsg("Preencha o endereço de entrega (Rua e Número).");
+                return;
+            }
+
+            const bairroObj = deliveryRates[bairroVal];
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const total = subtotal + bairroObj.price;
+
+            // Construir a mensagem estratégica e limpa
+            let msg = `*🔥 NOVO PEDIDO - SÓ NA BRASA 🔥*\n\n`;
+            
+            msg += `*DADOS DO CLIENTE*\n`;
+            msg += `👤 Nome: ${nome}\n`;
+            msg += `📱 Tel: ${tel}\n`;
+            if (bairroVal === 'retirada') {
+                msg += `📍 Entrega: *RETIRAR NO LOCAL*\n`;
+            } else {
+                msg += `📍 Endereço: ${rua}, Bairro: ${bairroObj.name}\n`;
+            }
+            if (obs) msg += `📝 Obs: ${obs}\n`;
+            
+            msg += `\n*RESUMO DO PEDIDO*\n`;
+            cart.forEach(item => {
+                msg += `▶ ${item.qty}x ${item.name} (${formatCurrency(item.price * item.qty)})\n`;
+            });
+
+            msg += `\n-----------------------\n`;
+            msg += `Subtotal: ${formatCurrency(subtotal)}\n`;
+            if (bairroVal !== 'retirada') {
+                msg += `Taxa de Entrega: ${formatCurrency(bairroObj.price)}\n`;
+            }
+            msg += `*💰 TOTAL A PAGAR: ${formatCurrency(total)}*\n`;
+            msg += `-----------------------\n`;
+            msg += `\nAguardando confirmação e tempo de entrega!`;
+
+            const encodedMsg = encodeURIComponent(msg);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`;
+            
+            // Limpa o carrinho após enviar? Estrategicamente é melhor não limpar imediatamente caso a pessoa não envie, 
+            // mas como vai abrir o app, não temos controle. Vamos manter no LocalStorage.
+            
+            window.location.href = whatsappUrl;
+        }
+
+        // --- AÇÃO DIRETA BOTÃO FLUTUANTE ---
+        function openDirectWhatsapp(e) {
+            e.preventDefault();
+            const msg = encodeURIComponent("Olá! Vim pelo site e gostaria de tirar uma dúvida sobre o cardápio.");
+            window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+        }
+
+        // --- GATILHO DE ESCASSEZ (A ANIMAÇÃO LETAL) ---
+        const fakeNames = ["Carlos", "Maria", "João", "Ana", "Lucas", "Fernanda", "Pedro", "Juliana"];
+        const fakeBairros = ["do Centro", "do Sítio", "do Alto Santa Tereza", "do Núcleo"];
+        const fakeItems = ["Picanha na Brasa", "Baião de Dois", "Frango Assado", "Costela ao Barbecue", "Maminha Fatiada"];
+
+        function startSocialProof() {
+            const toast = document.getElementById('sales-toast');
+            
+            setInterval(() => {
+                // Sorteia os dados
+                const name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+                const bairro = fakeBairros[Math.floor(Math.random() * fakeBairros.length)];
+                const item = fakeItems[Math.floor(Math.random() * fakeItems.length)];
+
+                document.getElementById('toast-name').innerText = `${name} ${bairro}`;
+                document.getElementById('toast-item').innerText = item;
+
+                // Mostra notificação
+                toast.classList.remove('hidden', 'toast-exit');
+                toast.classList.add('toast-enter');
+                
+                // Remove após 4 segundos
+                setTimeout(() => {
+                    toast.classList.remove('toast-enter');
+                    toast.classList.add('toast-exit');
+                }, 4000);
+
+            }, 18000); // Repete a cada 18 segundos
+        }
+
+        // --- SISTEMA VISUAL DE BRASAS (FAÍSCAS) ---
+        function createEmbers() {
+            const container = document.getElementById('embers-container');
+            if(!container) return;
+
+            // Cria uma brasa/faísca a cada 500ms
+            setInterval(() => {
+                const ember = document.createElement('div');
+                ember.classList.add('ember');
+                
+                // Tamanho aleatório para dar profundidade (entre 2px e 7px)
+                const size = Math.random() * 5 + 2;
+                ember.style.width = `${size}px`;
+                ember.style.height = `${size}px`;
+                
+                // Posição de origem horizontal aleatória (0 a 100% da tela)
+                ember.style.left = `${Math.random() * 100}%`;
+                
+                // Tempo de vida e velocidade do "vento" lateral variados
+                ember.style.setProperty('--duration', `${Math.random() * 3 + 2}s`); 
+                ember.style.setProperty('--drift', `${(Math.random() - 0.5) * 200}px`); 
+                
+                container.appendChild(ember);
+                
+                // Remove elemento para não pesar a memória do celular
+                setTimeout(() => {
+                    if (ember.parentNode) {
+                        ember.parentNode.removeChild(ember);
+                    }
+                }, 5000);
+            }, 500); 
+        }
+
+        // --- CAIXA DE MENSAGEM CUSTOMIZADA ---
+        function showMsg(text) {
+            document.getElementById('msg-box-text').innerText = text;
+            document.getElementById('msg-box').classList.remove('hidden');
+            document.getElementById('msg-overlay').classList.remove('hidden');
+        }
+
+        function closeMsgBox() {
+            document.getElementById('msg-box').classList.add('hidden');
+            document.getElementById('msg-overlay').classList.add('hidden');
+        }
+
+        // Inicializa a aplicação
+        window.onload = init;
+
+    </script>
+</body>
+</html>
