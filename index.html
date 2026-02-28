@@ -192,8 +192,8 @@
         <!-- Gradiente de Profundidade Cinematográfica -->
         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-carvao-900 z-0 pointer-events-none"></div>
 
-        <div class="absolute top-4 left-4 flex items-center gap-1 text-fogo-400 text-xs font-bold pulse-soft bg-black/50 px-2 py-1 rounded-full border border-fogo-500/30 z-20 shadow-lg">
-            <div class="w-2 h-2 bg-fogo-500 rounded-full animate-ping mr-1"></div> Aberto agora
+        <div id="store-status-badge" class="absolute top-4 left-4 flex items-center gap-1 text-fogo-400 text-xs font-bold pulse-soft bg-black/50 px-2 py-1 rounded-full border border-fogo-500/30 z-20 shadow-lg">
+            <div class="w-2 h-2 bg-fogo-500 rounded-full animate-ping mr-1"></div> Verificando...
         </div>
         
         <!-- Aura de Fogo Traseira da Logo -->
@@ -220,7 +220,7 @@
         <div class="mt-8 flex justify-center gap-6 text-xs md:text-sm font-bold text-gray-400 relative z-30">
             <div class="flex items-center gap-1 hover:text-white transition-colors">
                 <svg class="w-4 h-4 text-fogo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                18h às 23h
+                Sáb e Dom • 08h às 17h
             </div>
             <div class="flex items-center gap-1 hover:text-white transition-colors">
                 <svg class="w-4 h-4 text-fogo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -362,10 +362,6 @@
                 <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider">Dados para Entrega</h3>
                 <form id="checkout-form" class="space-y-3">
                     <input type="text" id="cliente-nome" placeholder="Seu Nome" required class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors">
-                    
-                    <div class="flex gap-2">
-                        <input type="tel" id="cliente-tel" placeholder="WhatsApp / Celular" required class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors">
-                    </div>
 
                     <select id="cliente-bairro" required onchange="calculateTotal()" class="w-full bg-carvao-900 border border-carvao-600 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-brasa-500 transition-colors appearance-none">
                         <option value="" disabled selected>Selecione seu Bairro...</option>
@@ -404,7 +400,7 @@
         <!-- Footer do Modal (Botão de Envio) -->
         <div class="p-4 bg-carvao-950 border-t border-carvao-800">
             <button onclick="finishOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-xl flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(34,197,94,0.3)] active:scale-95 transition-transform text-lg">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.614-.087-.112-.708-.94-.708-1.793s.448-1.273.606-1.446c.158-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.173.087.289.129.332.202.043.073.043.423-.101.827z"></path></svg>
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.614-.087-.112-.708-.94-.708-1.793s.448-1.273.606-1.446c.158-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.173.087.289.129.332.202.043.073.043.423-.101.827z"></path><path d="M11.994 2C6.476 2 2 6.477 2 11.996c0 1.947.538 3.824 1.559 5.424L2 22l4.755-1.229c1.554.912 3.328 1.42 5.24 1.42 5.517 0 9.993-4.476 9.993-9.996S17.511 2 11.994 2zm0 18.232c-1.66 0-3.26-.453-4.666-1.303l-.335-.2-3.037.784.81-2.923-.22-.352c-.933-1.488-1.426-3.203-1.426-4.996 0-4.639 3.774-8.412 8.413-8.412 4.638 0 8.412 3.773 8.412 8.412s-3.774 8.412-8.412 8.412z"></path></svg>
                 Finalizar pelo WhatsApp
             </button>
             <p class="text-[10px] text-center text-gray-500 mt-2">Você será redirecionado para enviar o pedido.</p>
@@ -480,10 +476,42 @@
         ];
 
         // --- ESTADO DO SISTEMA ---
-        let cart = JSON.parse(localStorage.getItem('sonabrasa_cart')) || [];
+        // Agora inicia com o carrinho vazio e limpa qualquer vestígio anterior.
+        let cart = [];
+
+        // --- LÓGICA DE HORÁRIO DE FUNCIONAMENTO ---
+        function isStoreOpen() {
+            const now = new Date();
+            const day = now.getDay(); // 0 = Domingo, 1 = Segunda... 6 = Sábado
+            const hour = now.getHours();
+
+            // Funciona Sábado (6) e Domingo (0), das 08h às 16:59 (menor que 17)
+            const isWeekend = (day === 0 || day === 6);
+            const isWorkingHour = (hour >= 8 && hour < 17);
+
+            return isWeekend && isWorkingHour;
+        }
+
+        function checkStoreStatus() {
+            const badge = document.getElementById('store-status-badge');
+            if (!badge) return;
+
+            if (isStoreOpen()) {
+                badge.innerHTML = '<div class="w-2 h-2 bg-green-500 rounded-full animate-ping mr-1"></div> Aberto agora';
+                badge.className = 'absolute top-4 left-4 flex items-center gap-1 text-green-400 text-xs font-bold pulse-soft bg-black/50 px-2 py-1 rounded-full border border-green-500/30 z-20 shadow-lg';
+            } else {
+                badge.innerHTML = '<div class="w-2 h-2 bg-red-500 rounded-full mr-1"></div> Fechado';
+                badge.className = 'absolute top-4 left-4 flex items-center gap-1 text-red-400 text-xs font-bold bg-black/50 px-2 py-1 rounded-full border border-red-500/30 z-20 shadow-lg';
+            }
+        }
 
         // --- INICIALIZAÇÃO ---
         function init() {
+            // Assegurar que os dados locais sumam quando o site for iniciado
+            localStorage.removeItem('sonabrasa_cart');
+            document.getElementById('checkout-form').reset();
+            
+            checkStoreStatus(); // Valida se está aberto ou fechado ao abrir o site
             renderNav();
             renderMenu();
             updateCartUI();
@@ -780,15 +808,20 @@
 
         // --- CHECKOUT VIA WHATSAPP ---
         function finishOrder() {
+            // Verifica se está aberto antes de deixar finalizar o pedido
+            if (!isStoreOpen()) {
+                showMsg("Oops! Estamos fechados agora. Nosso horário de funcionamento é Sábado e Domingo, das 08h às 17h. Te esperamos lá!");
+                return;
+            }
+
             // Validações básicas
             const nome = document.getElementById('cliente-nome').value.trim();
-            const tel = document.getElementById('cliente-tel').value.trim();
             const bairroVal = document.getElementById('cliente-bairro').value;
             const rua = document.getElementById('cliente-rua').value.trim();
             const obs = document.getElementById('cliente-obs').value.trim();
 
-            if (!nome || !tel || !bairroVal) {
-                showMsg("Preencha seu Nome, Telefone e Bairro para continuar.");
+            if (!nome || !bairroVal) {
+                showMsg("Preencha seu Nome e Bairro para continuar.");
                 return;
             }
             if (bairroVal !== 'retirada' && !rua) {
@@ -805,7 +838,6 @@
             
             msg += `*DADOS DO CLIENTE*\n`;
             msg += `👤 Nome: ${nome}\n`;
-            msg += `📱 Tel: ${tel}\n`;
             if (bairroVal === 'retirada') {
                 msg += `📍 Entrega: *RETIRAR NO LOCAL*\n`;
             } else {
@@ -852,6 +884,9 @@
             const toast = document.getElementById('sales-toast');
             
             setInterval(() => {
+                // SÓ MOSTRA NOTIFICAÇÃO SE ESTIVER ABERTO (Gatilho Assertivo)
+                if (!isStoreOpen()) return;
+
                 // Sorteia os dados
                 const name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
                 const bairro = fakeBairros[Math.floor(Math.random() * fakeBairros.length)];
