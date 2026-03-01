@@ -21,6 +21,7 @@
                             500: '#ef4444', // Vermelho
                             600: '#dc2626',
                             700: '#b91c1c',
+                            900: '#7f1d1d',
                         },
                         fogo: {
                             400: '#facc15', // Amarelo
@@ -173,7 +174,7 @@
         </div>
     </div>
 
-    <!-- Container das Brasas Animadas (z-index aumentado para cobrir tudo) -->
+    <!-- Container das Brasas Animadas -->
     <div id="embers-container" class="fixed inset-0 pointer-events-none overflow-hidden z-[110]"></div>
 
     <!-- Notificação Flutuante de Vendas (Gatilho de Escassez) -->
@@ -192,8 +193,9 @@
         <!-- Gradiente de Profundidade Cinematográfica -->
         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-carvao-900 z-0 pointer-events-none"></div>
 
-        <div id="store-status-badge" class="absolute top-4 left-4 flex items-center gap-1 text-fogo-400 text-xs font-bold pulse-soft bg-black/50 px-2 py-1 rounded-full border border-fogo-500/30 z-20 shadow-lg">
-            <div class="w-2 h-2 bg-fogo-500 rounded-full animate-ping mr-1"></div> Verificando...
+        <!-- Badge Dinâmico de Aberto/Fechado -->
+        <div id="status-badge" class="absolute top-4 left-4 flex items-center gap-1 text-xs font-bold bg-black/50 px-3 py-1.5 rounded-full border border-carvao-700 z-20 shadow-lg transition-all duration-300">
+            <!-- Conteúdo injetado via JS (Aberto ou Fechado) -->
         </div>
         
         <!-- Aura de Fogo Traseira da Logo -->
@@ -220,7 +222,7 @@
         <div class="mt-8 flex justify-center gap-6 text-xs md:text-sm font-bold text-gray-400 relative z-30">
             <div class="flex items-center gap-1 hover:text-white transition-colors">
                 <svg class="w-4 h-4 text-fogo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Sáb e Dom • 08h às 17h
+                Sáb e Dom, 08h às 17h
             </div>
             <div class="flex items-center gap-1 hover:text-white transition-colors">
                 <svg class="w-4 h-4 text-fogo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -276,7 +278,7 @@
                     </div>
                 </div>
                 <div class="flex text-fogo-500 text-sm mb-2">★★★★★</div>
-                <p class="text-sm text-gray-300 italic leading-relaxed">"Melhor baião de dois de São Miguel, sem dúvidas. Chegou tudo quentinho no Sítio."</p>
+                <p class="text-sm text-gray-300 italic leading-relaxed">"Melhor arroz tropeiro de São Miguel, sem dúvidas. Chegou tudo quentinho no Sítio."</p>
             </div>
              <!-- Review 3 -->
              <div class="min-w-[280px] bg-carvao-900 p-5 rounded-2xl shadow-lg border border-carvao-700 snap-center transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(239,68,68,0.15)] hover:border-brasa-500/30 relative z-10">
@@ -288,7 +290,7 @@
                     </div>
                 </div>
                 <div class="flex text-fogo-500 text-sm mb-2">★★★★★</div>
-                <p class="text-sm text-gray-300 italic leading-relaxed">"Pedi a maminha e tava no ponto perfeito. O atendimento pelo Zap foi nota 10."</p>
+                <p class="text-sm text-gray-300 italic leading-relaxed">"Pedi a picanha e estava no ponto perfeito. O atendimento pelo Zap foi nota 10."</p>
             </div>
         </div>
     </section>
@@ -348,16 +350,16 @@
                 <!-- Injetado via JS -->
             </div>
 
-            <!-- Upsell Automático (Aparece se não tiver Baião de Dois) -->
+            <!-- Upsell Automático (Aparece se não tiver Arroz Tropeiro) -->
             <div id="upsell-container" class="bg-gradient-to-r from-fogo-500/10 to-transparent border border-fogo-500/30 rounded-xl p-3 mb-6 hidden flex justify-between items-center">
                 <div>
                     <p class="text-fogo-400 font-bold text-sm flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Turbinar pedido?</p>
-                    <p class="text-xs text-gray-300">Adicione nosso famoso Baião por R$ 18</p>
+                    <p class="text-xs text-gray-300">Adicione nosso Arroz Tropeiro por R$ 10</p>
                 </div>
                 <button onclick="addUpsell()" class="bg-fogo-500 text-carvao-900 text-xs font-bold px-3 py-2 rounded-lg active:scale-95 transition-transform">Add</button>
             </div>
 
-            <!-- Formulário de Checkout Simples -->
+            <!-- Formulário de Checkout Simples (Sem Telefone) -->
             <div class="bg-carvao-800 p-4 rounded-xl border border-carvao-700 mb-6">
                 <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider">Dados para Entrega</h3>
                 <form id="checkout-form" class="space-y-3">
@@ -409,7 +411,7 @@
 
     <!-- Componente de Mensagem Simples (Substitui alert) -->
     <div id="msg-box" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-carvao-800 border border-brasa-500 text-white p-5 rounded-xl shadow-2xl z-[60] hidden w-[80%] max-w-[300px] text-center">
-        <p id="msg-box-text" class="mb-4 text-sm font-bold"></p>
+        <p id="msg-box-text" class="mb-4 text-sm font-bold whitespace-pre-wrap"></p>
         <button onclick="closeMsgBox()" class="bg-brasa-600 w-full py-2 rounded-lg font-bold">OK</button>
     </div>
     <div id="msg-overlay" class="fixed inset-0 bg-black/80 z-[55] hidden" onclick="closeMsgBox()"></div>
@@ -476,32 +478,29 @@
         ];
 
         // --- ESTADO DO SISTEMA ---
-        // Agora inicia com o carrinho vazio e limpa qualquer vestígio anterior.
+        // Inicia com o carrinho vazio (reseta tudo a cada visita).
         let cart = [];
 
-        // --- LÓGICA DE HORÁRIO DE FUNCIONAMENTO ---
+        // --- SISTEMA DE HORÁRIO DE FUNCIONAMENTO ---
         function isStoreOpen() {
             const now = new Date();
             const day = now.getDay(); // 0 = Domingo, 1 = Segunda... 6 = Sábado
             const hour = now.getHours();
 
-            // Funciona Sábado (6) e Domingo (0), das 08h às 16:59 (menor que 17)
-            const isWeekend = (day === 0 || day === 6);
-            const isWorkingHour = (hour >= 8 && hour < 17);
-
-            return isWeekend && isWorkingHour;
+            // Aberto no Sábado (6) e Domingo (0), das 08:00 às 16:59 (17h em ponto fecha)
+            return (day === 0 || day === 6) && (hour >= 8 && hour < 17);
         }
 
-        function checkStoreStatus() {
-            const badge = document.getElementById('store-status-badge');
+        function updateStoreStatus() {
+            const badge = document.getElementById('status-badge');
             if (!badge) return;
 
             if (isStoreOpen()) {
-                badge.innerHTML = '<div class="w-2 h-2 bg-green-500 rounded-full animate-ping mr-1"></div> Aberto agora';
-                badge.className = 'absolute top-4 left-4 flex items-center gap-1 text-green-400 text-xs font-bold pulse-soft bg-black/50 px-2 py-1 rounded-full border border-green-500/30 z-20 shadow-lg';
+                badge.innerHTML = `<div class="w-2 h-2 bg-green-500 rounded-full animate-ping mr-1"></div> <span class="text-green-400 tracking-wide">Aberto agora</span>`;
+                badge.className = "absolute top-4 left-4 flex items-center gap-1 text-xs font-bold pulse-soft bg-black/80 px-4 py-1.5 rounded-full border border-green-500/50 z-20 shadow-[0_0_15px_rgba(34,197,94,0.3)] transition-all duration-500";
             } else {
-                badge.innerHTML = '<div class="w-2 h-2 bg-red-500 rounded-full mr-1"></div> Fechado';
-                badge.className = 'absolute top-4 left-4 flex items-center gap-1 text-red-400 text-xs font-bold bg-black/50 px-2 py-1 rounded-full border border-red-500/30 z-20 shadow-lg';
+                badge.innerHTML = `<div class="w-2 h-2 bg-red-600 rounded-full mr-1 shadow-[0_0_8px_rgba(220,38,38,0.8)]"></div> <span class="text-red-400 tracking-wide">Fechado</span>`;
+                badge.className = "absolute top-4 left-4 flex items-center gap-1 text-xs font-bold bg-black/90 px-4 py-1.5 rounded-full border border-red-900/50 z-20 shadow-lg opacity-90 transition-all duration-500";
             }
         }
 
@@ -511,7 +510,9 @@
             localStorage.removeItem('sonabrasa_cart');
             document.getElementById('checkout-form').reset();
             
-            checkStoreStatus(); // Valida se está aberto ou fechado ao abrir o site
+            updateStoreStatus();
+            setInterval(updateStoreStatus, 60000); // Atualiza o status Aberto/Fechado a cada minuto
+
             renderNav();
             renderMenu();
             updateCartUI();
@@ -537,7 +538,6 @@
             const nav = document.getElementById('category-nav');
             let html = '';
             menuData.forEach((cat, index) => {
-                // Primeira categoria selecionada visualmente
                 const bgClass = index === 0 ? 'bg-brasa-600 text-white' : 'bg-carvao-800 text-gray-400 hover:text-white';
                 html += `
                     <li class="snap-start shrink-0">
@@ -551,11 +551,9 @@
         }
 
         function setActiveNav(element) {
-            // Remove active from all
             document.querySelectorAll('#category-nav a').forEach(a => {
                 a.className = "px-4 py-2 rounded-full text-sm font-bold block whitespace-nowrap border border-carvao-700 transition-colors bg-carvao-800 text-gray-400 hover:text-white";
             });
-            // Add to clicked
             element.className = "px-4 py-2 rounded-full text-sm font-bold block whitespace-nowrap border border-carvao-700 transition-colors bg-brasa-600 text-white";
         }
 
@@ -578,6 +576,7 @@
                     html += `
                         <div id="card-${item.id}" class="bg-carvao-800 rounded-xl p-3 md:p-4 flex gap-3 md:gap-4 border border-carvao-700 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(239,68,68,0.15)] group cursor-pointer" onclick="document.getElementById('btn-add-${item.id}').click()">
                             ${badge}
+                            
                             <!-- Etiqueta de Quantidade (Marcador Visual) -->
                             <div id="badge-${item.id}" class="absolute top-0 right-0 bg-brasa-600 text-white font-bold rounded-bl-xl px-3 py-1 text-sm shadow-[0_0_10px_rgba(239,68,68,0.5)] z-20 transition-transform duration-300 hidden transform scale-0">
                                 0x
@@ -610,6 +609,12 @@
 
         // --- LÓGICA DO CARRINHO ---
         function addToCart(id, name, price) {
+            // BLOQUEIO DE HORÁRIO
+            if (!isStoreOpen()) {
+                showMsg("Nossa churrasqueira está apagada no momento. 😴🔥\n\nAtendemos apenas aos Sábados e Domingos, das 08h às 17h!\nFique com água na boca e volte no final de semana.");
+                return;
+            }
+
             const existing = cart.find(i => i.id === id);
             if (existing) {
                 existing.qty++;
@@ -619,12 +624,12 @@
             saveCart();
             updateCartUI();
             
-            // Vibração do celular (Padrão: bate, pausa, bate forte)
+            // Vibração do celular
             if ("vibrate" in navigator) {
                 navigator.vibrate([50, 30, 80]);
             }
             
-            // Explosão de brasas visual (Recompensa)
+            // Explosão de brasas visual
             burstEmbers();
             
             // Feedback visual rápido no botão
@@ -634,7 +639,6 @@
                 btn.innerHTML = `<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
                 btn.classList.add('bg-brasa-500', 'border-brasa-500');
                 
-                // Força uma animaçãozinha extra no card
                 const card = document.getElementById(`card-${id}`);
                 card.classList.add('scale-[0.98]');
                 
@@ -655,9 +659,8 @@
                 }
                 saveCart();
                 updateCartUI();
-                renderCartModal(); // Re-renderiza o modal se estiver aberto
+                renderCartModal(); 
                 
-                // Vibração leve para remoção/edição
                 if ("vibrate" in navigator) {
                     navigator.vibrate(30);
                 }
@@ -681,13 +684,12 @@
                 floatingBar.classList.remove('translate-y-full');
             } else {
                 floatingBar.classList.add('translate-y-full');
-                // Se zerar o carrinho, fecha o modal
                 if(document.getElementById('cart-modal').classList.contains('open')){
                     toggleCart();
                 }
             }
 
-            // Atualizar o visual "Marcado" nos cards do Menu
+            // Atualizar o visual "Marcado" nos cards
             menuData.forEach(cat => {
                 cat.items.forEach(item => {
                     const card = document.getElementById(`card-${item.id}`);
@@ -696,20 +698,16 @@
 
                     if (card && badge) {
                         if (cartItem) {
-                            // Deixar super marcado: Margem luminosa vermelha e fundo avermelhado
                             card.classList.add('border-brasa-500', 'bg-brasa-900/30', 'shadow-[0_0_15px_rgba(239,68,68,0.3)]');
                             card.classList.remove('border-carvao-700', 'bg-carvao-800');
                             
-                            // Atualizar e Mostrar a quantidade no canto
                             badge.innerText = `${cartItem.qty}x`;
                             badge.classList.remove('hidden');
                             setTimeout(() => badge.classList.remove('scale-0'), 10);
                         } else {
-                            // Tirar marcação (reverter para o estado original)
                             card.classList.remove('border-brasa-500', 'bg-brasa-900/30', 'shadow-[0_0_15px_rgba(239,68,68,0.3)]');
                             card.classList.add('border-carvao-700', 'bg-carvao-800');
                             
-                            // Esconder quantidade
                             badge.classList.add('scale-0');
                             setTimeout(() => badge.classList.add('hidden'), 300);
                         }
@@ -729,16 +727,14 @@
             const overlay = document.getElementById('modal-overlay');
             
             if (modal.classList.contains('open')) {
-                // Fechar
                 modal.classList.remove('open');
                 overlay.classList.add('hidden');
                 document.body.style.overflow = '';
             } else {
-                // Abrir
                 renderCartModal();
                 modal.classList.add('open');
                 overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Evita scroll do fundo
+                document.body.style.overflow = 'hidden';
             }
         }
 
@@ -763,7 +759,6 @@
             });
             container.innerHTML = html;
 
-            // Lógica do Upsell: Se não tem Arroz Tropeiro (id p1), mostra o banner
             const hasTropeiro = cart.some(i => i.id === 'p1');
             const upsell = document.getElementById('upsell-container');
             if (!hasTropeiro && cart.length > 0) {
@@ -777,7 +772,7 @@
 
         function addUpsell() {
             addToCart('p1', 'Arroz Tropeiro', 10.00);
-            renderCartModal(); // Atualiza a view na hora
+            renderCartModal(); 
         }
 
         function calculateTotal() {
@@ -787,7 +782,6 @@
             const bairroSelect = document.getElementById('cliente-bairro');
             let taxa = 0;
             
-            // Mostrar ou Esconder Campo de Endereço Dinamicamente (Deixa o Formulário mais limpo)
             const endWrapper = document.getElementById('endereco-wrapper');
             if (bairroSelect.value && bairroSelect.value !== 'retirada') {
                 endWrapper.classList.remove('hidden');
@@ -808,13 +802,11 @@
 
         // --- CHECKOUT VIA WHATSAPP ---
         function finishOrder() {
-            // Verifica se está aberto antes de deixar finalizar o pedido
             if (!isStoreOpen()) {
-                showMsg("Oops! Estamos fechados agora. Nosso horário de funcionamento é Sábado e Domingo, das 08h às 17h. Te esperamos lá!");
+                showMsg("Nossa churrasqueira está apagada no momento. 😴🔥\n\nAtendemos apenas aos Sábados e Domingos, das 08h às 17h!\nFique com água na boca e volte no final de semana.");
                 return;
             }
 
-            // Validações básicas
             const nome = document.getElementById('cliente-nome').value.trim();
             const bairroVal = document.getElementById('cliente-bairro').value;
             const rua = document.getElementById('cliente-rua').value.trim();
@@ -833,7 +825,6 @@
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const total = subtotal + bairroObj.price;
 
-            // Construir a mensagem estratégica e limpa
             let msg = `*🔥 NOVO PEDIDO - SÓ NA BRASA 🔥*\n\n`;
             
             msg += `*DADOS DO CLIENTE*\n`;
@@ -862,9 +853,6 @@
             const encodedMsg = encodeURIComponent(msg);
             const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`;
             
-            // Limpa o carrinho após enviar? Estrategicamente é melhor não limpar imediatamente caso a pessoa não envie, 
-            // mas como vai abrir o app, não temos controle. Vamos manter no LocalStorage.
-            
             window.location.href = whatsappUrl;
         }
 
@@ -884,10 +872,8 @@
             const toast = document.getElementById('sales-toast');
             
             setInterval(() => {
-                // SÓ MOSTRA NOTIFICAÇÃO SE ESTIVER ABERTO (Gatilho Assertivo)
-                if (!isStoreOpen()) return;
+                if (!isStoreOpen()) return; // IMPEDE AS NOTIFICAÇÕES SE A LOJA ESTIVER FECHADA
 
-                // Sorteia os dados
                 const name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
                 const bairro = fakeBairros[Math.floor(Math.random() * fakeBairros.length)];
                 const item = fakeItems[Math.floor(Math.random() * fakeItems.length)];
@@ -895,17 +881,15 @@
                 document.getElementById('toast-name').innerText = `${name} ${bairro}`;
                 document.getElementById('toast-item').innerText = item;
 
-                // Mostra notificação
                 toast.classList.remove('hidden', 'toast-exit');
                 toast.classList.add('toast-enter');
                 
-                // Remove após 4 segundos
                 setTimeout(() => {
                     toast.classList.remove('toast-enter');
                     toast.classList.add('toast-exit');
                 }, 4000);
 
-            }, 18000); // Repete a cada 18 segundos
+            }, 18000); 
         }
 
         // --- SISTEMA VISUAL DE BRASAS (FAÍSCAS) ---
@@ -913,26 +897,19 @@
             const container = document.getElementById('embers-container');
             if(!container) return;
 
-            // Cria uma brasa/faísca a cada 500ms
             setInterval(() => {
                 const ember = document.createElement('div');
                 ember.classList.add('ember');
                 
-                // Tamanho aleatório para dar profundidade (entre 2px e 7px)
                 const size = Math.random() * 5 + 2;
                 ember.style.width = `${size}px`;
                 ember.style.height = `${size}px`;
-                
-                // Posição de origem horizontal aleatória (0 a 100% da tela)
                 ember.style.left = `${Math.random() * 100}%`;
-                
-                // Tempo de vida e velocidade do "vento" lateral variados
                 ember.style.setProperty('--duration', `${Math.random() * 3 + 2}s`); 
                 ember.style.setProperty('--drift', `${(Math.random() - 0.5) * 200}px`); 
                 
                 container.appendChild(ember);
                 
-                // Remove elemento para não pesar a memória do celular
                 setTimeout(() => {
                     if (ember.parentNode) {
                         ember.parentNode.removeChild(ember);
@@ -945,19 +922,15 @@
             const container = document.getElementById('embers-container');
             if(!container) return;
 
-            // Cria uma cascata mais agressiva (30 faíscas) ao clicar em comprar
             for(let i=0; i<30; i++) {
                 setTimeout(() => {
                     const ember = document.createElement('div');
                     ember.classList.add('ember');
                     
-                    const size = Math.random() * 8 + 3; // Brilhos ainda maiores
+                    const size = Math.random() * 8 + 3; 
                     ember.style.width = `${size}px`;
                     ember.style.height = `${size}px`;
-                    
                     ember.style.left = `${Math.random() * 100}%`;
-                    
-                    // Mais rápidas, caóticas e intensas
                     ember.style.setProperty('--duration', `${Math.random() * 1.2 + 0.8}s`); 
                     ember.style.setProperty('--drift', `${(Math.random() - 0.5) * 600}px`); 
                     
@@ -966,7 +939,7 @@
                     setTimeout(() => {
                         if (ember.parentNode) ember.parentNode.removeChild(ember);
                     }, 2000);
-                }, i * 20); // Lançamento cascata super rápido
+                }, i * 20); 
             }
         }
 
@@ -982,7 +955,6 @@
             document.getElementById('msg-overlay').classList.add('hidden');
         }
 
-        // Inicializa a aplicação
         window.onload = init;
 
     </script>
